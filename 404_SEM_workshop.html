@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEM workshop videos</title>
+<style>
+:root{--g:#123D2B;--t:#0F766E;--p:#FBFBF8;--i:#17231E;--m:#E3F1EA;--gold:#B8912F}
+body{margin:0;background:var(--p);color:var(--i);font-family:"Segoe UI",Arial,sans-serif}
+header{background:var(--g);color:#fff;padding:18px 28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{margin:0;font-size:22px}header small{opacity:.8}
+main{display:grid;grid-template-columns:minmax(260px,360px) 1fr;gap:20px;padding:20px 28px}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.notice{margin:20px 28px 0;padding:12px 14px;border-radius:12px;background:#fff;border:2px solid #DDE3DF}
+ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+li button{width:100%;text-align:left;border:2px solid #DDE3DF;background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;font:inherit}
+li button.on{border-color:var(--t);background:var(--m)}
+li b{color:var(--t)}li .w{font-size:13px;color:#5b6762}
+video{width:100%;background:#000;border-radius:12px}
+.info{margin-top:10px;font-size:15px}.music{margin-top:18px;padding:12px 14px;border-radius:12px;background:#fff;border:2px solid #DDE3DF}
+kbd{border:1px solid #bbb;border-radius:4px;padding:0 5px;font-size:12px;background:#fff;color:#333}
+</style>
+</head>
+<body>
+<header>
+<h1>SEM workshop · videos</h1>
+<small><kbd>F</kbd> full screen · <kbd>Space</kbd> pause/play · <kbd>N</kbd> next video · voice-over with captions and soft music</small>
+</header>
+
+<div class="notice">
+<strong>Workshop video portal</strong> · The requested page was not found, so the workshop video library is shown below.
+</div>
+
+<main>
+<ul id="list"></ul>
+<section>
+<video id="v" controls preload="metadata"></video>
+<div class="info" id="info"></div>
+<div class="music">
+<b>Lab music</b> (loops quietly while teams work):
+<audio id="a" src="/AI_SEM-wkshop/Lab_music_soft.mp3" controls loop style="vertical-align:middle;max-width:100%"></audio>
+</div>
+</section>
+</main>
+
+<script>
+const BASE="/AI_SEM-wkshop/";
+const V=[{"id": "V1", "file": "V1_Same_model_two_prompts.mp4", "title": "Same model, two prompts", "when": "10:00 · M1", "len": "1:17", "what": "Opens Module 1: a weak and a strong prompt to the same model, and what came back.", "votes": 1}, {"id": "V2", "file": "V2_Fix_it_in_three_turns.mp4", "title": "Fix weak output in three turns", "when": "10:05 · M1", "len": "1:06", "what": "Replaces the live three-turn demo: diagnose, constrain, verify.", "votes": 1}, {"id": "V3", "file": "V3_The_planning_chain.mp4", "title": "The planning chain", "when": "11:40 · M2", "len": "1:08", "what": "Replaces the live planning demo: P01 to P05 on a demo page (US home insurance), so no Lab 2 answer is shown.", "votes": 1}, {"id": "V4", "file": "V4_Weekly_AI_Max_review.mp4", "title": "Your weekly AI Max review", "when": "11:40 · M2", "len": "1:14", "what": "The 15-minute AI Max routine (exclude, cut, keep, log) on a demo account.", "votes": 1}, {"id": "V5", "file": "V5_Wasted_spend_in_Excel.mp4", "title": "Find wasted spend with Copilot in Excel", "when": "13:52 · M3", "len": "1:12", "what": "Copilot in Excel on a demo account: label, total, show the formula, reconcile.", "votes": 1}, {"id": "V6", "file": "V6_Anomaly_detective.mp4", "title": "Anomaly detective (watch and vote)", "when": "14:25 · M3", "len": "3:58", "what": "Lab 3b as a watch-and-vote game: five cases from File A, one team card per case.", "votes": 5}, {"id": "V7", "file": "V7_From_finding_to_a_yes.mp4", "title": "From finding to a yes", "when": "15:35 · M4", "len": "1:02", "what": "A vague AI draft turned into three lines a CMO can approve (Pet, from the War Room numbers).", "votes": 1}, {"id": "V8", "file": "V8_Who_won_the_test.mp4", "title": "Who really won the test? (watch and vote)", "when": "16:07 · M4", "len": "2:33", "what": "Lab 4b as a watch-and-vote game: four A/B tests from File D, one team card per test.", "votes": 4}, {"id": "V9", "file": "V9_A_workflow_in_action.mp4", "title": "A workflow in action", "when": "16:45 · M5", "len": "1:22", "what": "The capstone default workflow run end to end on a demo account, with one known case and what \"done\" means.", "votes": 1}];
+const list=document.getElementById('list'),vid=document.getElementById('v'),info=document.getElementById('info');
+let cur=0;
+
+V.forEach((x,i)=>{
+ const li=document.createElement('li');
+ const b=document.createElement('button');
+ b.innerHTML=`<b>${x.id}</b> · ${x.title}<div class="w">${x.when} · ${x.len}${x.votes?` · ${x.votes} vote${x.votes>1?'s':''}`:''}</div>`;
+ b.onclick=()=>pick(i,true);
+ li.appendChild(b);list.appendChild(li);
+});
+
+function pick(i,play){
+ cur=i;
+ const x=V[i];
+ vid.src=BASE+x.file;
+ info.textContent=x.what;
+ [...list.querySelectorAll('button')].forEach((b,j)=>b.classList.toggle('on',j===i));
+ const a=document.getElementById('a');
+ if(!a.paused)a.pause();
+ if(play)vid.play().catch(()=>{});
+}
+
+document.addEventListener('keydown',e=>{
+ if(e.target.tagName==='BUTTON'&&e.key===' ')e.preventDefault();
+ if(e.key==='f'||e.key==='F'){
+   if(document.fullscreenElement)document.exitFullscreen();
+   else if(vid.requestFullscreen)vid.requestFullscreen();
+ }
+ if(e.key===' '){e.preventDefault();vid.paused?vid.play():vid.pause();}
+ if(e.key==='n'||e.key==='N')pick((cur+1)%V.length,true);
+});
+
+pick(0,false);
+</script>
+</body>
+</html>
