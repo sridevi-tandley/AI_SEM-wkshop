@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SEM Arcade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F6F1E4;--surface:#FFFDF7;--surface2:#EEF4F0;--ink:#17231E;--muted:#4F5B56;--line:#DDD5C1;--brand:#123D2B;--brand-ink:#F3EFE4;
+--accent:#1B5E3B;--gold:#9A7420;--gold-soft:#FBF1D9;--gold-ink:#7A5A12;--good:#1B5E3B;--good-soft:#E3F1E8;--bad:#B42318;--bad-soft:#FBE9E7;
+--chip:#F1ECDD;--shadow:0 1px 2px rgba(23,35,30,.06),0 6px 20px rgba(23,35,30,.06);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1813;--surface:#15231C;--surface2:#1A2C23;--ink:#ECE7DA;--muted:#A7B2AC;
+--line:#2C3D34;--brand:#0B2A1D;--brand-ink:#F3EFE4;--accent:#86CCA1;--gold:#E6CD85;--gold-soft:#3A3120;--gold-ink:#E6CD85;--good:#86CCA1;
+--good-soft:#1D3A2A;--bad:#F2877A;--bad-soft:#3D1F1B;--chip:#22332A;--shadow:none;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1813;--surface:#15231C;--surface2:#1A2C23;--ink:#ECE7DA;--muted:#A7B2AC;--line:#2C3D34;--brand:#0B2A1D;
+--brand-ink:#F3EFE4;--accent:#86CCA1;--gold:#E6CD85;--gold-soft:#3A3120;--gold-ink:#E6CD85;--good:#86CCA1;--good-soft:#1D3A2A;--bad:#F2877A;
+--bad-soft:#3D1F1B;--chip:#22332A;--shadow:none;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 'IBM Plex Sans',Arial,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Source Serif 4',Georgia,serif;font-weight:600;line-height:1.15;margin:0}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.mono{font-family:'IBM Plex Mono',monospace}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+header.top{background:var(--brand);color:var(--brand-ink);padding:22px 0 0}
+.top .row{display:flex;gap:20px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.top .kick{font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#E6CD85}
+.top h1{font-size:40px;margin-top:6px;color:#FBF7EC}
+.top .sub{color:#D7DED9;margin-top:6px;max-width:620px}
+.xpbox{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:12px 16px;min-width:260px}
+.xpbox .n{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:#FBF7EC}
+.xpbox .n small{font-size:14px;color:#C9D2CC;font-weight:400}
+.bar{height:8px;background:rgba(255,255,255,.14);border-radius:99px;overflow:hidden;margin:8px 0 6px}
+.bar i{display:block;height:100%;background:#E6CD85;border-radius:99px;transition:width .5s ease}
+.rank{font-size:13px;color:#D7DED9}.rank b{color:#E6CD85}
+.xpbox .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.ghost{background:transparent;border:1px solid rgba(255,255,255,.3);color:#F3EFE4;border-radius:99px;padding:5px 12px;font-size:13px}
+.ghost:hover{background:rgba(255,255,255,.1)}
+nav.tabs{display:flex;gap:4px;margin-top:20px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab{background:transparent;border:0;color:#C9D2CC;padding:12px 16px 14px;border-radius:12px 12px 0 0;font-weight:600;white-space:nowrap;font-size:15px}
+.tab[aria-selected="true"]{background:var(--bg);color:var(--ink)}
+.tab .dot{display:inline-block;min-width:22px;margin-left:6px;padding:0 6px;border-radius:99px;background:rgba(230,205,133,.22);color:#E6CD85;font-size:12px;font-family:'IBM Plex Mono',monospace}
+.tab[aria-selected="true"] .dot{background:var(--gold-soft);color:var(--gold-ink)}
+main.wrap{padding-top:26px;padding-bottom:40px}
+.lead{color:var(--muted);max-width:760px;margin-bottom:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.label{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.presets{display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
+.pgroup{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pgroup .label{margin-right:6px}
+.pill{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:7px 14px;font-weight:600;font-size:14px}
+.pill:hover{border-color:var(--accent)}
+.pill[aria-pressed="true"]{background:var(--brand);color:#F3EFE4;border-color:var(--brand)}
+details.cases{border:1px dashed var(--gold);border-radius:14px;padding:10px 14px;background:var(--gold-soft)}
+details.cases summary{cursor:pointer;font-weight:600;color:var(--gold-ink)}
+details.cases .pgroup{margin-top:10px}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}
+.lever{padding:12px 0;border-bottom:1px solid var(--line)}
+.lever:last-child{border-bottom:0}
+.lv-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.lv-top label{font-weight:600}
+.lv-top output{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:17px}
+.lever .help{font-size:13px;color:var(--muted);margin-top:2px}
+.lever.ctr .lv-top label::after{content:"not in ROAS";margin-left:8px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-ink);background:var(--gold-soft);padding:2px 8px;border-radius:99px;vertical-align:2px}
+.lever.tgt{background:var(--surface2);margin:8px -12px 0;padding:12px;border-radius:12px;border:0}
+input[type=range]{width:100%;margin:8px 0 2px;accent-color:var(--accent);height:28px}
+.chain{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap}
+.stage{flex:1 1 110px;background:var(--surface2);border-radius:12px;padding:10px 12px;min-width:104px}
+.stage .k{font-size:12px;color:var(--muted);font-weight:600}
+.stage .v{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600}
+.arrow{align-self:center;font-size:12px;color:var(--muted);text-align:center;min-width:64px;font-family:'IBM Plex Mono',monospace}
+.arrow b{display:block;color:var(--ink);font-size:13px}
+.costline{font-size:14px;color:var(--muted);margin-top:10px}
+.eq{margin-top:16px;padding:14px;border-radius:12px;background:var(--brand);color:#F3EFE4;font-family:'IBM Plex Mono',monospace;font-size:15px;line-height:1.7}
+.eq .t{color:#E6CD85;font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:4px}
+.eq .f{display:inline-block;padding:0 6px;border-radius:6px;background:rgba(255,255,255,.08)}
+.eq .r{font-weight:600;font-size:18px;color:#FBF7EC}
+.eq .x{opacity:.65;font-size:13px;font-family:'IBM Plex Sans',sans-serif}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:12px}
+.tile .k{font-size:12px;color:var(--muted);font-weight:600}
+.tile .v{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;margin-top:2px}
+.tile .s{font-size:12.5px;color:var(--muted);margin-top:2px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px}
+.tag.good{background:var(--good-soft);color:var(--good)}.tag.bad{background:var(--bad-soft);color:var(--bad)}
+.gauge{position:relative;height:12px;border-radius:99px;background:var(--chip);margin-top:8px;overflow:visible}
+.gauge i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--bad);transition:width .25s ease}
+.gauge i.ok{background:var(--good)}
+.gauge b{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
+.flash{animation:fl .6s ease}
+@keyframes fl{0%{background:var(--gold-soft)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none}.bar i,.gauge i{transition:none}}
+.cmp{margin-top:18px}
+.cmp-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 12px;font-size:14px;font-weight:600}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--brand);color:#F3EFE4;border-color:var(--brand)}
+.tbl{width:100%;border-collapse:collapse;font-size:14.5px}
+.tbl th,.tbl td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.tbl th:first-child,.tbl td:first-child{text-align:left;white-space:normal}
+.tbl thead th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.tbl td{font-family:'IBM Plex Mono',monospace}
+.tbl td:first-child{font-family:'IBM Plex Sans',sans-serif}
+.tbl tr.big td{background:var(--gold-soft)}
+.tblwrap{overflow-x:auto}
+.decomp{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--surface2);font-size:15px}
+.decomp .mono{font-size:14.5px}
+.casebox{margin-top:14px;border-left:4px solid var(--gold);padding:4px 0 4px 14px}
+.casebox h3{font-size:20px}
+.casebox p{margin-top:6px}
+.casebox .lnk{background:none;border:0;padding:0;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.missions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
+.mission{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surface)}
+.mission.done{border-color:var(--good);background:var(--good-soft)}
+.mission h3{font-size:17px;font-family:'IBM Plex Sans',sans-serif;font-weight:700}
+.mission p{font-size:14px;color:var(--muted);margin-top:4px}
+.mission .xp{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--gold-ink)}
+.mission.done .xp::before{content:"✓ done · "}
+.vvgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.vv{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--surface)}
+.vv h3{font-size:18px;font-family:'IBM Plex Sans',sans-serif;font-weight:700}
+.vv .ch{display:flex;gap:8px;margin-top:10px}
+.vv .ch button{flex:1;border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:9px;font-weight:700}
+.vv .ch button:hover:not(:disabled){border-color:var(--accent)}
+.vv .ch button:disabled{cursor:default}
+.vv .ch button.right{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.vv .ch button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.vv .why,.qcard .why{margin-top:10px;font-size:14.5px}
+.score{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.score .chipn{background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:14px}
+.qmap{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.qmap button{width:40px;height:40px;border-radius:50%;border:2px solid var(--line);background:var(--surface);font-family:'IBM Plex Mono',monospace;font-weight:600}
+.qmap button.cur{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+.qmap button.ok{background:var(--good);border-color:var(--good);color:#fff}
+.qmap button.no{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.qcard h2{font-size:24px;margin-top:6px}
+.opts{display:grid;gap:8px;margin-top:16px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt .l{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--gold-ink);min-width:18px}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.qfoot{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center}
+.hintbox{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--gold-soft);color:var(--gold-ink);font-size:14.5px}
+.ideas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+details.idea{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0}
+details.idea summary{list-style:none;cursor:pointer;padding:16px;display:flex;gap:12px;align-items:flex-start}
+details.idea summary::-webkit-details-marker{display:none}
+details.idea .num{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--gold-ink);background:var(--gold-soft);border-radius:8px;padding:2px 8px;font-size:13px}
+details.idea h3{font-size:19px}
+details.idea .c{font-size:13.5px;color:var(--muted);margin-top:3px}
+details.idea .body{padding:0 16px 16px;display:grid;gap:10px}
+details.idea .body .k{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+details.idea .use{background:var(--brand);color:#F3EFE4;border-radius:10px;padding:10px 12px}
+details.idea .use .k{color:#E6CD85}
+details.idea .src{font-size:13px;color:var(--muted)}
+details.idea[open]{border-color:var(--gold)}
+footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);font-size:13.5px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(20px);background:var(--brand);color:#F3EFE4;padding:10px 16px;border-radius:12px;
+box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:all .3s ease;max-width:min(92vw,560px);font-size:14.5px;z-index:10}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast b{color:#E6CD85}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-width:900px){.grid{grid-template-columns:1fr}.missions{grid-template-columns:1fr}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.wrap{padding:0 16px}.top h1{font-size:32px}.xpbox{min-width:0;width:100%}.vvgrid,.ideas{grid-template-columns:1fr}
+.tiles{grid-template-columns:1fr 1fr}.tile .v{font-size:20px}.arrow{min-width:100%;text-align:left}.stage{flex-basis:100%}.qcard h2{font-size:21px}}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+ <div class="row">
+  <div>
+   <p class="kick">Advanced AI &amp; Copilot for SEM · after the day</p>
+   <h1>SEM Arcade</h1>
+   <p class="sub">The day's ideas, on the day's numbers. Move the levers of a paid-search funnel, sort vanity from value, and clear ten concept stations.</p>
+  </div>
+  <div class="xpbox" aria-live="polite">
+   <div class="n"><span id="xp">0</span> <small>/ <span id="xpmax"></span> XP</small></div>
+   <div class="bar"><i id="xpbar" style="width:0"></i></div>
+   <p class="rank">Rank: <b id="rank"></b> <span id="next"></span></p>
+   <div class="acts"><button class="ghost" id="copy">Copy my result</button><button class="ghost" id="theme">Dark mode</button><button class="ghost" id="reset">Reset</button></div>
+  </div>
+ </div>
+ <nav class="tabs" role="tablist" aria-label="Arcade sections">
+  <button class="tab" role="tab" data-tab="funnel" aria-controls="p-funnel">Funnel lab <span class="dot" id="d-funnel"></span></button>
+  <button class="tab" role="tab" data-tab="vv" aria-controls="p-vv">Vanity or value <span class="dot" id="d-vv"></span></button>
+  <button class="tab" role="tab" data-tab="quest" aria-controls="p-quest">Concept quest <span class="dot" id="d-quest"></span></button>
+  <button class="tab" role="tab" data-tab="ideas" aria-controls="p-ideas">Ten ideas</button>
+ </nav>
+</div></header>
+
+<main class="wrap">
+ <section class="panel" id="p-funnel" role="tabpanel">
+  <p class="lead">Pick a starting point, then move one lever at a time. Watch what moves ROAS, and what only moves volume. Numbers are per day, from the workshop's practice data (synthetic).</p>
+  <div class="presets">
+   <div class="pgroup" id="sept"><span class="label">September, per day</span></div>
+   <details class="cases"><summary>After Lab 3b: what changed? (answers inside)</summary><div class="pgroup" id="cases"></div></details>
+  </div>
+  <div class="grid">
+   <div class="card"><p class="label">The levers</p><div id="sliders"></div></div>
+   <div class="card">
+    <p class="label">The funnel, per day</p>
+    <div class="chain" id="chain" style="margin-top:10px"></div>
+    <p class="costline" id="costline"></p>
+    <div class="eq" id="eq"></div>
+    <div class="tiles" id="tiles"></div>
+   </div>
+  </div>
+  <div class="card cmp">
+   <div class="cmp-head"><p class="label" id="cmptitle">Start versus now</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="snap">Save current as start</button><button class="btn" id="restart">Back to start</button></div></div>
+   <div class="tblwrap"><table class="tbl" id="cmp"></table></div>
+   <div class="decomp" id="decomp"></div>
+   <div id="casebox"></div>
+  </div>
+  <div class="missions" id="missions"></div>
+ </section>
+
+ <section class="panel" id="p-vv" role="tabpanel" hidden>
+  <p class="lead">Vanity metrics only go up and change nothing you do. Value metrics tell you what to do next. One answer per metric: 5 XP if right, 2 XP for a thoughtful miss.</p>
+  <div class="score" id="vvscore"></div>
+  <div class="vvgrid" id="vvgrid"></div>
+ </section>
+
+ <section class="panel" id="p-quest" role="tabpanel" hidden>
+  <p class="lead">Ten stations, one answer each. 15 XP if right (12 with the hint); a wrong answer still earns 40% and shows the reasoning.</p>
+  <div class="qmap" id="qmap" aria-label="Stations"></div>
+  <div class="card qcard" id="qcard"></div>
+ </section>
+
+ <section class="panel" id="p-ideas" role="tabpanel" hidden>
+  <p class="lead">The six concept cards from the day and four more for your own reading; each card names its published source. Open a card for the idea, what it means in SEM, and a line to use on Monday.</p>
+  <div class="ideas" id="ideas"></div>
+ </section>
+</main>
+<footer><div class="wrap">SIJI Consultancy · Dr. Sridevi Tandley Omprakash · Forbes Advisor SEM workshop, 5 October 2026. Practice data are synthetic. Your progress is kept in this browser only.</div></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+const D = {"sept":[{"label":"1–27 Sep, per day","days":27,"impr":22984.037037,"ctr":0.054331,"cor":0.182614,"rpco":43.248704,"cpc":7.83491,"target":1.2,"team":"Loans"},{"label":"1–27 Sep, per day","days":27,"impr":15775.814815,"ctr":0.04343,"cor":0.29034,"rpco":22.690123,"cpc":5.665288,"target":1.25,"team":"Cards"},{"label":"1–27 Sep, per day","days":27,"impr":10195.037037,"ctr":0.069409,"cor":0.252591,"rpco":20.951842,"cpc":3.202024,"target":1.3,"team":"Pet"},{"label":"1–27 Sep, per day","days":27,"impr":5042.037037,"ctr":0.039321,"cor":0.170185,"rpco":67.810439,"cpc":11.998302,"target":1.25,"team":"CRM"}],"cases":[{"id":"cards_cpc","team":"Cards","title":"Cards · CPC jump from 8 September","before":{"label":"18 Aug–7 Sep","days":21,"impr":17679.380952,"ctr":0.044679,"cor":0.274114,"rpco":22.234425,"cpc":4.543004,"target":1.25},"after":{"label":"8–27 Sep","days":20,"impr":15070.0,"ctr":0.043427,"cor":0.293682,"rpco":22.709735,"cpc":6.114631,"target":1.25},"card":"C4","what":"CPC rose +35% ($4.54 to $6.11) while click-out rate and payout hardly moved, so ROAS fell from 1.34x to 1.09x.","cause":"Nothing in the change log. Auction insights show a new competitor from the week of 7 September with a high impression share: a cause outside the account.","action":"Hold a ROAS guardrail, put spend on the terms with the highest revenue per click, refresh copy, and brief leadership on a market-driven CPC rise.","extra":[]},{"id":"crm_payout","team":"CRM","title":"CRM · ROAS falls with no change in readers","before":{"label":"August","days":31,"impr":5078.967742,"ctr":0.041239,"cor":0.160943,"rpco":89.923311,"cpc":11.863585,"target":1.25},"after":{"label":"1–27 Sep","days":27,"impr":5042.037037,"ctr":0.039321,"cor":0.170185,"rpco":67.810439,"cpc":11.998302,"target":1.25},"card":"H7","what":"Click-out rate went up (16.1% to 17.0%) and CPC barely moved, yet ROAS fell from 1.22x to 0.96x. Revenue per click-out fell from $89.92 to $67.81.","cause":"The readers behaved the same; the money per click-out changed. Change log: the partner payout schedule was updated on 1 September. The customer (the partner) changed, not the user.","action":"Reset target CPCs or target ROAS to the new payout, and ask partnerships to renegotiate or rebalance partners.","extra":[]},{"id":"loans_tracking","team":"Loans","title":"Loans · Click-outs vanish on 14–15 September","before":{"label":"9–27 Sep, other days","days":17,"impr":24388.705882,"ctr":0.05256,"cor":0.191033,"rpco":42.682971,"cpc":7.753728,"target":1.2},"after":{"label":"14–15 Sep","days":2,"impr":26091.5,"ctr":0.055535,"cor":0.005866,"rpco":44.642941,"cpc":7.786339,"target":1.2},"card":"C4","what":"Clicks per day were normal (1,282 to 1,449) and CPC hardly moved, but the click-out rate fell from 19.1% to 0.6%.","cause":"A measurement failure, not a performance crash: a site release on 14 September broke click-out tracking until it was rolled back on 16 September. The ROAS you see for those days is what was recorded, not what was earned.","action":"Add a data exclusion for Smart Bidding for 14–15 September, reconcile with partner reports, and set an alert: click-outs down 50% day on day with clicks flat.","extra":[]},{"id":"loans_aimax","team":"Loans","title":"Loans · More impressions, less money","before":{"label":"17 Aug–8 Sep","days":23,"impr":19393.304348,"ctr":0.059566,"cor":0.218036,"rpco":43.733225,"cpc":8.040523,"target":1.2},"after":{"label":"16–27 Sep","days":12,"impr":24255.833333,"ctr":0.052458,"cor":0.191499,"rpco":42.950397,"cpc":7.78505,"target":1.2},"card":"C3","what":"Impressions per day rose +25%, while CTR and click-out rate both fell about 12%. ROAS fell from 1.19x to 1.06x, below the 1.20x target.","cause":"The AI Max upgrade notice on 9 September: broader matching bought more volume of lower intent. Impressions went up, which is why they are a vanity metric on their own.","action":"Run the Lab 3a search-term audit, add negative themes and URL exclusions, and judge AI Max term by term on profit, not volume.","extra":[]},{"id":"pet_budget","team":"Pet","title":"Pet · Beating target, capped by budget","before":{"label":"29 Jun–12 Jul","days":14,"impr":10300.5,"ctr":0.06879,"cor":0.255645,"rpco":20.833762,"cpc":3.158189,"target":1.3},"after":{"label":"14–27 Sep","days":14,"impr":10288.857143,"ctr":0.068201,"cor":0.250102,"rpco":21.011779,"cpc":3.208025,"target":1.3},"card":"C3","what":"The funnel hardly moved and ROAS stayed well above the 1.30x target (1.69x to 1.64x). The decomposition finds no lever: the problem is not inside the funnel.","cause":"Demand grew but the $2,300 daily budget stayed flat, so the share of eligible searches lost because the budget ran out rose from 15.2% to 40.5%.","action":"Approve the pending budget increase with a stop rule (for example: pause the extra spend if ROAS falls below 1.30x for a week).","extra":[["Search impression share lost to budget","15.2%","40.5%"],["Profit per day: actual vs no budget limit (upper estimate)","$1,436","$2,414"]]}],"vv":[{"m":"Impressions per day","ans":"vanity","why":"Rises whenever matching broadens. After AI Max, Loans impressions rose +25% while ROAS fell below target."},{"m":"Click-out rate","ans":"value","why":"Activation: the reader reached a partner offer. It sits inside ROAS, and when it moves you know where to look."},{"m":"Number of prompts written in Copilot","ans":"vanity","why":"Output, not outcome. Count wasted spend removed, hours saved and errors caught instead."},{"m":"Revenue per click-out","ans":"value","why":"The payout. CRM's ROAS fell with no change in readers because this number fell."},{"m":"Click-through rate, on its own","ans":"vanity","why":"CTR is not in ROAS: it buys volume, not efficiency. It is a useful fatigue signal, but it can rise while money falls."},{"m":"Wasted-spend share (spend on terms with no click-outs)","ans":"value","why":"Lab 3a's number. It tells you which negative themes to add next, and you can watch it fall."},{"m":"AI headlines generated","ans":"vanity","why":"A volume of assets says nothing about whether they are compliant, provable or win clicks."},{"m":"Search impression share lost to budget","ans":"value","why":"Tells you whether more budget would buy more traffic of the same quality, as it did for Pet."}],"quest":[{"card":"C1","q":"A reader searches \"debt consolidation loan\". In jobs-to-be-done terms, what is the job?","opts":["Find a personal loan ad","When my card balances keep growing, I want one lower monthly payment, so I can get out of debt","Compare as many lenders as possible","Click the first result"],"a":1,"hint":"A job story has a situation, a motivation and an outcome.","why":"The query is a job in disguise. The page is hired for that job, and its rivals include doing nothing and going straight to one lender."},{"card":"C2","q":"Which headline is a positioning claim: one value, against the reader's real alternative, that the page can prove?","opts":["The best loans ever","Loans for everyone, fast","Compare rates from several lenders in one place, instead of applying to one at a time","Click here for great deals"],"a":2,"hint":"Positioning names the alternative the reader would otherwise use.","why":"One claim, against the alternative (going straight to one lender), and the comparison page can show it. Compliance stays a must-be."},{"card":"C3","q":"CTR rises 20%. Click-out rate, revenue per click-out and CPC do not change. What happens to ROAS?","opts":["It rises about 20%","It does not change","It falls","You cannot tell"],"a":1,"hint":"ROAS = click-out rate × revenue per click-out ÷ CPC.","why":"Clicks, cost and revenue all rise together, so ROAS stays put. CTR buys volume; profit per day rises only if ROAS is above 1."},{"card":"H7","q":"CRM: from August to September ROAS fell from 1.22x to 0.96x. Click-out rate rose (16.1% to 17.0%) and CPC hardly moved. Which lever moved?","opts":["CTR","CPC","Revenue per click-out (the partner payout)","Impressions"],"a":2,"hint":"If readers click out as often as before and clicks cost the same, what is left in the formula?","why":"Revenue per click-out fell from $89.92 to $67.81 after the 1 September payout change. The customer (the partner) changed, not the user."},{"card":"C4","q":"Click-outs fall 97% for two days while clicks are normal. What is the first move?","opts":["Rewrite the ads","Raise bids to win back volume","Split by date and check the change log and tracking before explaining it","Pause the campaign"],"a":2,"hint":"Clicks normal, click-outs gone: is it the reader, or the measurement?","why":"Split before you summarise. A release on 14 September broke click-out tracking; nothing about the readers changed."},{"card":"C4","q":"The tracking break lasted two days because no one checks tracking after a site release. On a fishbone, where does that root cause sit?","opts":["People","Process","Product","Promotion"],"a":1,"hint":"Is it one person's mistake, or a missing step that would catch anyone's?","why":"A missing check after releases is a process cause. The fix is a step and an alert, not blame."},{"card":"C5","q":"You raise the confidence level from 95% to 99% (80% power, same 2-point lift). The clicks needed per variant…","opts":["fall","stay the same","rise by about half (about 9,300 instead of 6,300)","rise about tenfold"],"a":2,"hint":"More certainty needs more evidence, but not ten times more.","why":"At 99% confidence you need about 9,300 clicks per variant instead of about 6,300: about half as many again."},{"card":"C5","q":"After three days variant B leads by 30% with 400 clicks each. You planned 6,300 clicks per variant. What do you do?","opts":["Ship B now","Stop the test: the result is clear","Keep running to the planned sample, then decide with the guardrail","Restart with new variants"],"a":2,"hint":"Early leads on small samples are often noise.","why":"Peeking turns noise into winners. Decide the sample size before launch, and decide on it after."},{"card":"C6","q":"Which is the best single goal for the team's AI workflows?","opts":["Prompts written per week","Copilot licences in use","Click-outs to partner offers at or above target ROAS","Impressions per day"],"a":2,"hint":"A good goal counts value delivered, not activity.","why":"It counts value for readers and the business. Proofs that it is moving: wasted-spend share, hours saved, AI errors caught."},{"card":"H7","q":"On a comparison site, who is the customer and who is the user?","opts":["The reader is both","The partner pays (customer); the reader uses the page (user)","Google is the customer","The SEM team is the customer"],"a":1,"hint":"Follow the money per click-out.","why":"Partners pay per click-out; readers use the page. That is why a payout change can move ROAS with no change in reader behaviour."}],"ideas":[{"id":"C1","title":"The searcher hires your page","concept":"Jobs-to-be-Done","idea":"People do not buy products; they hire them to make progress in a situation. A job story says it in one line: \"When [situation], I want to [motivation], so I can [outcome].\"","sem":"Every search query is a job in disguise. \"debt consolidation loan\" means: when my card balances keep growing, I want one lower monthly payment, so I can get out of debt. The comparison page is hired for that job, and its rivals include doing nothing and going straight to one lender.","use":"Prompt B's first step, \"list five reasons readers land on the page\", is jobs-to-be-done. Add to STEPS: \"Write each reason as a job story, then give each headline one job.\"","source":"Christensen, Hall, Dillon and Duncan, \"Know Your Customers' Jobs to Be Done\", Harvard Business Review, September 2016; job stories after Alan Klement."},{"id":"C2","title":"An ad group is a segment; a headline is a claim","concept":"Segmentation, targeting, positioning","idea":"Segment the market, target the segments you can win, then position: own one claim in the customer's mind against their real alternative. Dunford's order: competitive alternatives, unique attributes, the value they enable, the customers who care, the category.","sem":"In Lab 2 the case audience is the segment, the ad group is the target, and each headline is a positioning claim that File D must prove. Compliance is a Kano \"must-be\": nobody clicks because an ad is compliant, but one breach costs far more than any headline wins.","use":"Add to P04's RULES: \"Each headline states one value against the reader's alternative (going straight to one lender, or doing nothing), with proof from the page.\"","source":"Kotler and Keller, Marketing Management (segmentation, targeting, positioning); April Dunford, Obviously Awesome (2019); Noriaki Kano et al. (1984) on must-be and attractive quality."},{"id":"C3","title":"Find the leak before you buy more traffic","concept":"AARRR pirate metrics; vanity versus actionable metrics","idea":"Every product is a funnel: Acquisition, Activation, Retention, Revenue, Referral. A low number at one stage tells you where to work; pouring more acquisition into a leaking stage buys people who never reach value. Vanity metrics only go up; actionable ones change what you do next.","sem":"Paid search is a funnel too: impressions, clicks (CTR), click-outs (the reader reaches a partner offer: activation), revenue per click-out (the payout), return visits and brand searches (retention). ROAS = click-out rate × revenue per click-out ÷ CPC: CTR is not in it. CTR buys volume, not efficiency.","use":"Ask Copilot: \"For each campaign, show impressions, clicks, click-outs and revenue for this month and last month, and name the stage whose rate changed most.\" Wasted spend is traffic that never activates.","source":"Dave McClure, \"Startup Metrics for Pirates: AARRR!\" (2007); Eric Ries, The Lean Startup (2011) on vanity and actionable metrics."},{"id":"C4","title":"Split before you summarise","concept":"Cohorts and segmentation, the 5 Whys, the fishbone","idea":"An average hides the cause. Split the data by the dimension that shows the skew (date, platform, cohort) before you diagnose, then ask \"why\" until you reach something you can verify and fix. Sort causes on a fishbone: people, process, product, promotion.","sem":"Loans: click-outs fell 97% on 14–15 Sep. Why? Tracking stopped. Why? Release v4.2 changed the tag manager container. Why did it run for two days? No one checked tracking after the release: a process cause. CRM only made sense once weekdays and weekends were split.","use":"Add to any analysis prompt: \"Before summarising, split by weekday and weekend, by match type, and before and after each date in the change log.\"","source":"Taiichi Ohno, Toyota Production System (1988) for the 5 Whys; Kaoru Ishikawa for the cause-and-effect (fishbone) diagram."},{"id":"C5","title":"Decide the rules before you look","concept":"Hypothesis, sample size, no peeking, guardrails","idea":"A good test starts with If–Then–Because: the change, the metric and size you predict, and why. Fix the sample size, the duration and a guardrail metric before launch, and do not stop early because the first days look good: peeking turns noise into \"winners\".","sem":"To see a click-out rate move from 19% to 21% at 95% confidence and 80% power you need about 6,300 clicks per variant. Use profit as the guardrail: a variant can win CTR and still lose money.","use":"Ask Copilot (P21): \"Write an If–Then–Because hypothesis for this ad test, the clicks per variant needed for a 2-point change, the run length, and one guardrail metric.\"","source":"Kohavi, Tang and Xu, Trustworthy Online Controlled Experiments (Cambridge University Press, 2020)."},{"id":"C6","title":"Your workflow is an MVP: start small","concept":"Minimum viable product; four risks; one goal, one proof, one guardrail","idea":"An MVP, a minimum viable product, is the smallest version of something that tests your riskiest assumption with real use. Judge it on four risks: is it valuable (desirable), usable, feasible, and viable for the business? Give it one goal, one measurable proof and one guardrail.","sem":"Your capstone workflow is an MVP: one chain, one known case, run on Monday. One goal for the team: click-outs to partner offers at or above target ROAS. Proof you can measure within a week: wasted-spend share, hours saved, AI errors caught. Guardrail: no policy or tone breaches, and no cutting buyer research to flatter ROAS.","use":"In the 17:21 commitments, name one \"metric that proves it\": a result you can measure in a week, such as wasted spend removed, not a count of prompts written.","source":"Eric Ries, The Lean Startup (2011); Marty Cagan, Inspired (2nd ed., 2017) on value, usability, feasibility and viability risks."},{"id":"H7","title":"Customer ≠ user: two sides of a comparison site","concept":"Customer versus user; Business Model Canvas","idea":"Sometimes the people who pay are not the people who use. The Business Model Canvas makes both sides visible: customer segments, value propositions, channels, revenue streams.","sem":"The reader uses the page; the partner pays per click-out. Revenue streams sit with partners, so a payout change moves ROAS with no change in reader behaviour, as CRM's 1 September payout cut showed.","use":"Keep a \"partner terms\" line in every weekly review prompt: payout per click-out by partner, this period against last.","source":"Alexander Osterwalder and Yves Pigneur, Business Model Generation (2010)."},{"id":"H8","title":"Kano: which ad assets earn clicks","concept":"Kano model","idea":"Features differ in how they create satisfaction. Must-be features cause anger when missing and no delight when present; performance features satisfy in proportion; attractive features delight but are not expected.","sem":"Compliance, accuracy and a working landing page are must-be. Relevance to the job and a clear comparison are performance. A specific, provable benefit (\"Compare 30+ lenders in 2 minutes\", if the page shows it) can be attractive. Test attractive claims; never trade away a must-be.","use":"When reviewing Google AI assets, tag each as must-be risk, performance or attractive before deciding what to keep.","source":"Kano, Seraku, Takahashi and Tsuji, \"Attractive quality and must-be quality\" (1984)."},{"id":"H9","title":"Opportunity Solution Tree: choose what to automate next","concept":"Outcomes over output; Opportunity Solution Tree","idea":"Start from an outcome (a change in behaviour that drives results), branch into the opportunities that could move it, then into solutions, then into small experiments. Framing decides which solutions you can even see.","sem":"Outcome: less wasted spend at the same click-out volume. Opportunities: informational terms, existing-customer terms, AI Max matching, tracking breaks. Solutions: negative themes, shared lists, the weekly AI Max review, a release alert. Experiments: one workflow on one known case.","use":"At the Week-4 retro, draw the tree on one page before choosing the next workflow.","source":"Teresa Torres, Continuous Discovery Habits (2021); Josh Seiden, Outcomes Over Output (2019)."},{"id":"H10","title":"Outcomes, not output: empowered teams","concept":"Feature teams versus empowered product teams","idea":"A feature team is asked to build things (output); an empowered team is given a problem to solve and judged on the result (outcome).","sem":"Judge the AI programme on outcomes: wasted spend removed, hours saved, errors caught, workflows run weekly. Not on the number of prompts written or Copilot licences used. That is why the day scores money, not activity.","use":"Report the day-30 learning check and the Week-4 retro as outcomes, using the three numbers in the 30-day plan.","source":"Marty Cagan, Empowered (2020) and Inspired (2017)."}],"missions":[{"id":"ctr","xp":10,"title":"Prove CTR is not in ROAS","text":"Move the CTR slider. Watch clicks, cost and revenue move together while ROAS stays put."},{"id":"case","xp":10,"title":"Open a case from the day","text":"Load any \"After Lab 3b\" case and read which lever moved."},{"id":"one","xp":20,"title":"One lever to target","text":"Load Loans, Cards or CRM (all below target in September). Reach the target by moving only one lever: click-out rate, revenue per click-out or CPC. Which lever could your team really move?"}],"n95":6300,"total":230};
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const M = '−';
+const rnd = (x, p) => { const f = Math.pow(10, p); return Math.round((x + (x >= 0 ? 1e-9 : -1e-9)) * f) / f; };
+const sgn = (s, x) => (x < 0 ? M : '') + s;
+const fInt = x => sgn(Math.abs(rnd(x, 0)).toLocaleString('en-US'), rnd(x, 0));
+const fMoney = x => sgn('$' + Math.abs(rnd(x, 0)).toLocaleString('en-US'), rnd(x, 0));
+const fMoney2 = x => sgn('$' + Math.abs(rnd(x, 2)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}), rnd(x, 2));
+const fPct = x => sgn(Math.abs(rnd(x * 100, 1)).toFixed(1) + '%', rnd(x * 100, 1));
+const fX = x => rnd(x, 2).toFixed(2) + 'x';
+const fChg = r => { const v = rnd((r - 1) * 100, 1); return v > 0 ? '+' + v.toFixed(1) + '%' : (v < 0 ? M + Math.abs(v).toFixed(1) + '%' : '0.0%'); };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+
+// ---------- state (kept in this browser only)
+const KEY = 'sem-arcade-v1';
+let S = {m: {}, vv: {}, q: {}, tab: 'funnel', theme: null, qi: 0};
+try { const t = localStorage.getItem(KEY); if (t) { const o = JSON.parse(t); if (o && typeof o === 'object') S = Object.assign(S, o); } } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+// ---------- theme
+const applyTheme = () => {
+  const root = document.documentElement;
+  if (S.theme) root.setAttribute('data-theme', S.theme); else root.removeAttribute('data-theme');
+  let dark = S.theme === 'dark';
+  if (!S.theme) { try { dark = window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {} }
+  $('#theme').textContent = dark ? 'Light mode' : 'Dark mode';
+};
+$('#theme').addEventListener('click', () => {
+  const dark = $('#theme').textContent === 'Dark mode';
+  S.theme = dark ? 'dark' : 'light'; save(); applyTheme();
+});
+
+// ---------- XP and ranks
+const RANKS = [[0, 'Keyword Scout'], [80, 'Funnel Analyst'], [150, 'Test Designer'], [200, 'SEM Strategist']];
+function tally() {
+  let m = 0, mc = 0; D.missions.forEach(x => { if (S.m[x.id]) { m += x.xp; mc++; } });
+  let v = 0, vc = 0, vn = 0; D.vv.forEach((x, i) => { const c = S.vv[i]; if (c) { vn++; if (c === x.ans) { v += 5; vc++; } else v += 2; } });
+  let q = 0, qc = 0, qn = 0; D.quest.forEach((x, i) => { const a = S.q[i]; if (a && a.c != null) { qn++; if (a.c === x.a) { q += a.h ? 12 : 15; qc++; } else q += 6; } });
+  return {total: m + v + q, mc, vc, vn, qc, qn};
+}
+function renderXP() {
+  const t = tally();
+  $('#xp').textContent = t.total; $('#xpmax').textContent = D.total;
+  $('#xpbar').style.width = Math.min(100, 100 * t.total / D.total) + '%';
+  let r = RANKS[0], nx = null;
+  RANKS.forEach((k, i) => { if (t.total >= k[0]) { r = k; nx = RANKS[i + 1] || null; } });
+  $('#rank').textContent = r[1];
+  $('#next').textContent = nx ? '· ' + (nx[0] - t.total) + ' XP to ' + nx[1] : '· top rank';
+  $('#d-funnel').textContent = t.mc + '/' + D.missions.length;
+  $('#d-vv').textContent = t.vn + '/' + D.vv.length;
+  $('#d-quest').textContent = t.qn + '/' + D.quest.length;
+  return t;
+}
+let toastT = null;
+function toast(html) { const el = $('#toast'); el.innerHTML = html; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 4200); }
+
+// ---------- tabs
+function showTab(id) {
+  $$('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === id ? 'true' : 'false'));
+  $$('.panel').forEach(p => { p.hidden = p.id !== 'p-' + id; });
+  S.tab = id; save();
+}
+$$('.tab').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+
+// ---------- funnel lab
+const LEVERS = [
+  {id: 'impr', label: 'Impressions per day', min: 1000, max: 40000, step: 100, f: fInt, help: 'How often your ads showed. Set by budget, bids and matching.'},
+  {id: 'ctr', label: 'Click-through rate (CTR)', min: 0.01, max: 0.12, step: 0.001, f: fPct, help: 'Clicks ÷ impressions. It buys volume.'},
+  {id: 'cor', label: 'Click-out rate', min: 0.005, max: 0.4, step: 0.001, f: fPct, help: 'Click-outs ÷ clicks: the reader reached a partner offer (activation).'},
+  {id: 'rpco', label: 'Revenue per click-out', min: 5, max: 120, step: 0.25, f: fMoney2, help: 'What partners pay for each click-out (the payout).'},
+  {id: 'cpc', label: 'Cost per click (CPC)', min: 1, max: 20, step: 0.05, f: fMoney2, help: 'Set in the auction: your bids, quality and competitors.'},
+  {id: 'target', label: 'Target ROAS', min: 0.8, max: 2.0, step: 0.05, f: fX, help: 'The return the business asks for. Not a lever: the bar to clear.'}
+];
+const LBL = {cor: 'click-out rate', rpco: 'revenue per click-out', cpc: 'CPC', impr: 'impressions', ctr: 'CTR'};
+let V = Object.assign({}, D.sept[0]);
+let base = null, ctx = null;
+
+function calc(v) {
+  const clicks = v.impr * v.ctr, co = clicks * v.cor, rev = co * v.rpco, cost = clicks * v.cpc;
+  return {clicks, co, rev, cost, roas: v.cor * v.rpco / v.cpc, profit: rev - cost, rpc: v.cor * v.rpco, maxcpc: v.cor * v.rpco / v.target};
+}
+
+function buildSliders() {
+  const box = $('#sliders');
+  LEVERS.forEach(L => {
+    const w = document.createElement('div');
+    w.className = 'lever' + (L.id === 'ctr' ? ' ctr' : '') + (L.id === 'target' ? ' tgt' : '');
+    w.innerHTML = '<div class="lv-top"><label for="s-' + L.id + '">' + L.label + '</label><output id="o-' + L.id + '" for="s-' + L.id + '"></output></div>' +
+      '<input type="range" id="s-' + L.id + '" min="' + L.min + '" max="' + L.max + '" step="' + L.step + '"><p class="help">' + L.help + '</p>';
+    box.appendChild(w);
+    const inp = $('input', w);
+    inp.addEventListener('input', () => { V[L.id] = parseFloat(inp.value); onLever(L.id); });
+  });
+}
+function syncSliders() { LEVERS.forEach(L => { $('#s-' + L.id).value = V[L.id]; $('#o-' + L.id).textContent = L.f(V[L.id]); }); }
+
+let prevOut = {};
+function flash(id, val) { const el = document.getElementById(id); if (!el) return; if (prevOut[id] !== undefined && prevOut[id] !== val) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); } prevOut[id] = val; }
+
+function renderFunnel() {
+  const c = calc(V);
+  const st = (id, k, v) => '<div class="stage" id="' + id + '"><p class="k">' + k + '</p><p class="v">' + v + '</p></div>';
+  const ar = (k, v) => '<div class="arrow">' + k + '<b>' + v + '</b></div>';
+  $('#chain').innerHTML = st('st-i', 'Impressions', fInt(V.impr)) + ar('CTR', fPct(V.ctr)) + st('st-c', 'Clicks', fInt(c.clicks)) +
+    ar('click-out rate', fPct(V.cor)) + st('st-o', 'Click-outs', fInt(c.co)) + ar('× payout', fMoney2(V.rpco)) + st('st-r', 'Revenue', fMoney(c.rev));
+  $('#costline').innerHTML = 'Cost = clicks × CPC = ' + fInt(c.clicks) + ' × ' + fMoney2(V.cpc) + ' = <b>' + fMoney(c.cost) + '</b> a day.';
+  $('#eq').innerHTML = '<span class="t">Why CTR is missing</span>ROAS = <span class="f">click-out rate</span> × <span class="f">revenue per click-out</span> ÷ <span class="f">CPC</span><br>' +
+    '&nbsp; &nbsp; &nbsp;= ' + fPct(V.cor) + ' × ' + fMoney2(V.rpco) + ' ÷ ' + fMoney2(V.cpc) + ' = <span class="r" id="eq-r">' + fX(c.roas) + '</span><br>' +
+    '<span class="x">CTR adds clicks, cost and revenue in the same proportion, so it cancels out.</span>';
+  const ok = c.roas >= V.target - 1e-9;
+  const gw = Math.min(100, 100 * c.roas / 2.5), tw = Math.min(100, 100 * V.target / 2.5);
+  $('#tiles').innerHTML =
+    '<div class="tile" id="t-roas"><p class="k">ROAS vs target ' + fX(V.target) + '</p><p class="v">' + fX(c.roas) + '</p>' +
+    '<p class="s"><span class="tag ' + (ok ? 'good">meets target' : 'bad">' + fX(V.target - c.roas).replace('x', '') + ' below') + '</span></p>' +
+    '<div class="gauge" aria-hidden="true"><i class="' + (ok ? 'ok' : '') + '" style="width:' + gw + '%"></i><b style="left:' + tw + '%"></b></div></div>' +
+    '<div class="tile" id="t-profit"><p class="k">Profit per day</p><p class="v">' + fMoney(c.profit) + '</p><p class="s">Revenue ' + fMoney(c.rev) + ' − cost ' + fMoney(c.cost) + '</p></div>' +
+    '<div class="tile" id="t-max"><p class="k">Highest CPC that meets target</p><p class="v">' + fMoney2(c.maxcpc) + '</p><p class="s">Revenue per click ' + fMoney2(c.rpc) + ' ÷ ' + fX(V.target) + '</p></div>';
+  flash('st-c', fInt(c.clicks)); flash('st-o', fInt(c.co)); flash('st-r', fMoney(c.rev)); flash('t-roas', fX(c.roas)); flash('t-profit', fMoney(c.profit)); flash('t-max', fMoney2(c.maxcpc));
+}
+
+function renderCompare() {
+  const table = $('#cmp'), dec = $('#decomp');
+  if (!base) { table.innerHTML = ''; dec.innerHTML = 'Pick a starting point above, or press "Save current as start", then move a lever.'; return; }
+  const b = calc(base), n = calc(V);
+  const nowLabel = ctx && ctx.kind === 'case' && ctx.changed.size === 0 ? (V.label || 'After') : 'Now';
+  $('#cmptitle').textContent = (base.label || 'Start') + ' versus ' + (nowLabel === 'Now' ? 'now' : nowLabel);
+  const rows = [
+    ['Impressions per day', base.impr, V.impr, fInt, 'r'], ['CTR', base.ctr, V.ctr, fPct, 'r'], ['Clicks per day', b.clicks, n.clicks, fInt, 'r'],
+    ['Click-out rate', base.cor, V.cor, fPct, 'r', 'cor'], ['Revenue per click-out', base.rpco, V.rpco, fMoney2, 'r', 'rpco'], ['CPC', base.cpc, V.cpc, fMoney2, 'r', 'cpc'],
+    ['ROAS', b.roas, n.roas, fX, 'r'], ['Profit per day', b.profit, n.profit, fMoney, 'd']
+  ];
+  const lev = {cor: V.cor / base.cor, rpco: V.rpco / base.rpco, cpc: V.cpc / base.cpc};
+  const effect = {cor: Math.log(lev.cor), rpco: Math.log(lev.rpco), cpc: -Math.log(lev.cpc)};
+  let big = null; Object.keys(effect).forEach(k => { if (big === null || Math.abs(effect[k]) > Math.abs(effect[big])) big = k; });
+  const rr = n.roas / b.roas, moved = Math.abs(Math.log(rr)) >= 0.05;
+  table.innerHTML = '<thead><tr><th>Measure</th><th>' + esc(base.label || 'Start') + '</th><th>' + esc(nowLabel) + '</th><th>Change</th></tr></thead><tbody>' +
+    rows.map(r => '<tr' + (moved && r[5] === big ? ' class="big"' : '') + '><td>' + r[0] + '</td><td>' + r[3](r[1]) + '</td><td>' + r[3](r[2]) + '</td><td>' +
+      (r[4] === 'd' ? (r[2] - r[1] >= 0 ? '+' : '') + fMoney(r[2] - r[1]) : fChg(r[2] / r[1])) + '</td></tr>').join('') + '</tbody>';
+  const r2 = x => '×' + rnd(x, 2).toFixed(2);
+  let html = '<p class="mono">ROAS ' + r2(rr) + ' = click-out rate ' + r2(lev.cor) + ' × revenue per click-out ' + r2(lev.rpco) + ' ÷ CPC ' + r2(lev.cpc) + '</p>';
+  if (moved) {
+    const dir = effect[big] < 0 ? 'pulled ROAS down' : 'lifted ROAS';
+    html += '<p style="margin-top:6px"><b>Biggest lever: ' + LBL[big] + '</b> (' + fChg(lev[big]) + ') ' + dir + '.</p>';
+  } else {
+    const vol = V.impr * V.ctr / (base.impr * base.ctr);
+    html += '<p style="margin-top:6px"><b>ROAS hardly moved.</b> ' + (Math.abs(vol - 1) > 0.005 ? 'Volume did: clicks ' + fChg(vol) + ', profit per day ' + (n.profit - b.profit >= 0 ? '+' : '') + fMoney(n.profit - b.profit) + '. ' : '') +
+      'If the problem is real, look outside the funnel: impression share, budget, tracking.</p>';
+  }
+  dec.innerHTML = html;
+}
+
+function renderCase() {
+  const box = $('#casebox');
+  if (!ctx || ctx.kind !== 'case') { box.innerHTML = ''; return; }
+  const c = D.cases[ctx.idx];
+  const ex = c.extra.length ? '<table class="tbl" style="margin-top:10px"><tbody>' + c.extra.map(e => '<tr><td>' + esc(e[0]) + '</td><td>' + esc(e[1]) + '</td><td>' + esc(e[2]) + '</td></tr>').join('') + '</tbody></table>' : '';
+  const idea = D.ideas.find(i => i.id === c.card);
+  box.innerHTML = '<div class="casebox"><p class="label">The case</p><h3>' + esc(c.title) + '</h3><p>' + esc(c.what) + '</p>' + ex +
+    '<p><b>Why:</b> ' + esc(c.cause) + '</p><p><b>Do:</b> ' + esc(c.action) + '</p>' +
+    (idea ? '<p>Idea behind it: <button class="lnk" data-idea="' + idea.id + '">' + esc(idea.title) + '</button></p>' : '') + '</div>';
+  const l = $('.lnk', box); if (l) l.addEventListener('click', () => openIdea(l.dataset.idea));
+}
+
+function renderMissions() {
+  $('#missions').innerHTML = D.missions.map(m => '<div class="mission' + (S.m[m.id] ? ' done' : '') + '"><p class="xp">+' + m.xp + ' XP</p><h3>' + esc(m.title) + '</h3><p>' + esc(m.text) + '</p></div>').join('');
+}
+function complete(id, msg) {
+  if (S.m[id]) return;
+  S.m[id] = true; save(); renderMissions(); renderXP();
+  const m = D.missions.find(x => x.id === id);
+  toast('<b>Mission complete, +' + m.xp + ' XP.</b> ' + msg);
+}
+
+function renderAll() { syncSliders(); renderFunnel(); renderCompare(); renderCase(); }
+function setPressed(btn) { $$('#sept .pill, #cases .pill').forEach(b => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false')); }
+
+function loadSept(i, btn) {
+  const t = D.sept[i];
+  V = Object.assign({}, t, {label: 'Your scenario'});
+  base = Object.assign({}, t, {label: t.team + ' September'});
+  ctx = {kind: 'sept', idx: i, changed: new Set(), r0: calc(t).roas, t0: t.target};
+  prevOut = {}; setPressed(btn); renderAll();
+}
+function loadCase(i, btn) {
+  const c = D.cases[i];
+  V = Object.assign({}, c.after); base = Object.assign({}, c.before);
+  ctx = {kind: 'case', idx: i, changed: new Set()};
+  prevOut = {}; setPressed(btn); renderAll();
+  complete('case', 'Read the decomposition, then the "Why".');
+}
+function onLever(id) {
+  const L = LEVERS.find(l => l.id === id);
+  $('#o-' + id).textContent = L.f(V[id]);
+  if (ctx) ctx.changed.add(id);
+  renderFunnel(); renderCompare();
+  if (id === 'ctr') complete('ctr', 'CTR is now ' + fPct(V.ctr) + ' and ROAS is still ' + fX(calc(V).roas) + ': clicks, cost and revenue moved together.');
+  if (ctx && ctx.kind === 'sept' && ctx.r0 < ctx.t0 && !ctx.changed.has('target')) {
+    const levers = Array.from(ctx.changed).filter(k => k === 'cor' || k === 'rpco' || k === 'cpc');
+    const others = Array.from(ctx.changed).filter(k => k !== 'impr' && k !== 'ctr' && k !== 'cor' && k !== 'rpco' && k !== 'cpc');
+    if (levers.length === 1 && others.length === 0 && calc(V).roas >= V.target - 1e-9) {
+      const k = levers[0], t = D.sept[ctx.idx];
+      complete('one', t.team + ' reaches ' + fX(V.target) + ' with ' + LBL[k] + ' at ' + LEVERS.find(l => l.id === k).f(V[k]) + ' (September: ' + LEVERS.find(l => l.id === k).f(t[k]) + '). Is that change in your control?');
+    }
+  }
+}
+
+function buildPresets() {
+  D.sept.forEach((t, i) => {
+    const b = document.createElement('button'); b.className = 'pill'; b.textContent = t.team + ' · ' + fX(calc(t).roas);
+    b.title = t.team + ', 1–27 September, per day: ROAS ' + fX(calc(t).roas) + ' against a ' + fX(t.target) + ' target';
+    b.addEventListener('click', () => loadSept(i, b)); $('#sept').appendChild(b);
+  });
+  D.cases.forEach((c, i) => {
+    const b = document.createElement('button'); b.className = 'pill'; b.textContent = c.title;
+    b.addEventListener('click', () => loadCase(i, b)); $('#cases').appendChild(b);
+  });
+}
+$('#snap').addEventListener('click', () => {
+  base = Object.assign({}, V, {label: 'Saved start'}); ctx = {kind: 'own', changed: new Set()};
+  setPressed(null); renderAll(); toast('Saved. Now move a lever and read the change.');
+});
+$('#restart').addEventListener('click', () => {
+  if (!base) return;
+  V = ctx && ctx.kind === 'case' ? Object.assign({}, D.cases[ctx.idx].after) : Object.assign({}, base, {label: 'Your scenario'});
+  if (ctx) ctx.changed = new Set();
+  prevOut = {}; renderAll();
+});
+
+// ---------- vanity or value
+function renderVV() {
+  const t = tally();
+  $('#vvscore').innerHTML = '<span class="chipn">' + t.vn + ' of ' + D.vv.length + ' sorted</span><span class="chipn">' + t.vc + ' right</span>';
+  $('#vvgrid').innerHTML = D.vv.map((x, i) => {
+    const c = S.vv[i], done = !!c;
+    const cls = k => done ? (k === x.ans ? ' right' : (k === c ? ' wrong' : '')) : '';
+    return '<div class="vv"><h3>' + esc(x.m) + '</h3><div class="ch">' +
+      '<button data-i="' + i + '" data-k="vanity" class="' + cls('vanity') + '"' + (done ? ' disabled' : '') + '>Vanity</button>' +
+      '<button data-i="' + i + '" data-k="value" class="' + cls('value') + '"' + (done ? ' disabled' : '') + '>Value</button></div>' +
+      (done ? '<p class="why"><b>' + (c === x.ans ? 'Right.' : 'Not quite: it is ' + x.ans + '.') + '</b> ' + esc(x.why) + '</p>' : '') + '</div>';
+  }).join('');
+  $$('#vvgrid button[data-k]').forEach(b => b.addEventListener('click', () => {
+    const i = +b.dataset.i; if (S.vv[i]) return;
+    S.vv[i] = b.dataset.k; save(); renderVV(); renderXP();
+    const ok = b.dataset.k === D.vv[i].ans;
+    toast(ok ? '<b>+5 XP.</b> ' + esc(D.vv[i].m) + ' is ' + D.vv[i].ans + '.' : '<b>+2 XP</b> for the attempt. Read why below the card.');
+  }));
+}
+
+// ---------- concept quest
+function renderQuest() {
+  const i = Math.max(0, Math.min(D.quest.length - 1, S.qi || 0));
+  const x = D.quest[i], a = S.q[i] || {}, done = a.c != null;
+  $('#qmap').innerHTML = D.quest.map((q, k) => {
+    const s = S.q[k] || {}; const st = s.c == null ? '' : (s.c === q.a ? ' ok' : ' no');
+    return '<button data-k="' + k + '" class="' + (k === i ? 'cur' : '') + st + '" aria-label="Station ' + (k + 1) + '">' + (k + 1) + '</button>';
+  }).join('');
+  $$('#qmap button').forEach(b => b.addEventListener('click', () => { S.qi = +b.dataset.k; save(); renderQuest(); }));
+  const idea = D.ideas.find(d => d.id === x.card);
+  const L = 'ABCD';
+  $('#qcard').innerHTML = '<p class="label">Station ' + (i + 1) + ' of ' + D.quest.length + ' · ' + esc(idea ? idea.concept : '') + '</p><h2>' + esc(x.q) + '</h2>' +
+    '<div class="opts">' + x.opts.map((o, k) => '<button class="opt' + (done ? (k === x.a ? ' right' : (k === a.c ? ' wrong' : '')) : '') + '" data-k="' + k + '"' + (done ? ' disabled' : '') + '><span class="l">' + L[k] + '</span><span>' + esc(o) + '</span></button>').join('') + '</div>' +
+    (a.h && !done ? '<p class="hintbox">Hint: ' + esc(x.hint) + '</p>' : '') +
+    (done ? '<p class="why"><b>' + (a.c === x.a ? 'Right, +' + (a.h ? 12 : 15) + ' XP.' : 'Not this time, +6 XP. The answer is ' + L[x.a] + '.') + '</b> ' + esc(x.why) + '</p>' : '') +
+    '<div class="qfoot"><div style="display:flex;gap:8px;flex-wrap:wrap">' + (!done && !a.h ? '<button class="btn" id="qhint">Hint (−3 XP)</button>' : '') +
+    (idea ? '<button class="btn" id="qidea">Read the idea</button>' : '') + '</div>' +
+    '<div style="display:flex;gap:8px"><button class="btn" id="qprev"' + (i === 0 ? ' disabled' : '') + '>Back</button><button class="btn primary" id="qnext">' + (i === D.quest.length - 1 ? 'See my score' : 'Next station') + '</button></div></div>';
+  $$('#qcard .opt').forEach(b => b.addEventListener('click', () => {
+    if (done) return;
+    const k = +b.dataset.k; S.q[i] = Object.assign({}, S.q[i] || {}, {c: k}); save(); renderQuest(); renderXP();
+    toast(k === x.a ? '<b>+' + (a.h ? 12 : 15) + ' XP.</b> Station ' + (i + 1) + ' cleared.' : '<b>+6 XP</b> for the attempt. Read the reasoning.');
+  }));
+  const h = $('#qhint'); if (h) h.addEventListener('click', () => { S.q[i] = Object.assign({}, S.q[i] || {}, {h: true}); save(); renderQuest(); });
+  const r = $('#qidea'); if (r) r.addEventListener('click', () => openIdea(x.card));
+  $('#qprev').addEventListener('click', () => { S.qi = Math.max(0, i - 1); save(); renderQuest(); });
+  $('#qnext').addEventListener('click', () => {
+    if (i === D.quest.length - 1) { const t = renderXP(); toast('<b>' + t.qc + ' of ' + D.quest.length + ' stations right.</b> Total ' + t.total + ' XP, rank ' + $('#rank').textContent + '.'); return; }
+    S.qi = i + 1; save(); renderQuest();
+  });
+}
+
+// ---------- ten ideas
+function renderIdeas() {
+  $('#ideas').innerHTML = D.ideas.map((d, k) => '<details class="idea" id="idea-' + d.id + '"><summary><span class="num">' + (k + 1) + '</span><div><h3>' + esc(d.title) + '</h3><p class="c">' + esc(d.concept) + '</p></div></summary>' +
+    '<div class="body"><div><p class="k">The idea</p><p>' + esc(d.idea) + '</p></div><div><p class="k">In SEM</p><p>' + esc(d.sem) + '</p></div>' +
+    '<div class="use"><p class="k">Use it Monday</p><p>' + esc(d.use) + '</p></div><p class="src">Source: ' + esc(d.source) + '</p></div></details>').join('');
+}
+function openIdea(id) {
+  showTab('ideas');
+  const el = document.getElementById('idea-' + id); if (!el) return;
+  el.open = true; try { el.scrollIntoView({behavior: 'smooth', block: 'start'}); } catch (e) { el.scrollIntoView(); }
+}
+
+// ---------- copy result, reset
+$('#copy').addEventListener('click', () => {
+  const t = renderXP();
+  const txt = 'SEM Arcade: ' + t.total + '/' + D.total + ' XP, rank ' + $('#rank').textContent + '. Missions ' + t.mc + '/' + D.missions.length +
+    ', vanity or value ' + t.vc + '/' + D.vv.length + ', concept quest ' + t.qc + '/' + D.quest.length + '.';
+  const done = () => { const b = $('#copy'); b.textContent = 'Copied'; setTimeout(() => { b.textContent = 'Copy my result'; }, 1800); };
+  const fallback = () => {
+    const ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    if (ok) done(); else toast(esc(txt));
+  };
+  try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback(); } catch (e) { fallback(); }
+});
+let resetArm = null;
+$('#reset').addEventListener('click', () => {
+  const b = $('#reset');
+  if (!resetArm) { b.textContent = 'Click again to reset'; resetArm = setTimeout(() => { resetArm = null; b.textContent = 'Reset'; }, 3500); return; }
+  clearTimeout(resetArm); resetArm = null; b.textContent = 'Reset';
+  S = {m: {}, vv: {}, q: {}, tab: S.tab, theme: S.theme, qi: 0}; save();
+  renderMissions(); renderVV(); renderQuest(); renderXP(); toast('Progress cleared.');
+});
+
+// ---------- start
+applyTheme(); buildSliders(); buildPresets(); renderMissions(); renderVV(); renderQuest(); renderIdeas(); renderXP();
+loadSept(0, $('#sept .pill'));
+showTab(['funnel', 'vv', 'quest', 'ideas'].indexOf(S.tab) >= 0 ? S.tab : 'funnel');
+})();
+</script>
+</body>
+</html>
